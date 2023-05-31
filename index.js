@@ -1,56 +1,39 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const moment = require('moment');
+const fs = require('fs').promises;
 
 moment.locale('pt')
 
-// Credenciais de autenticação do WhatsApp Web
-const SESSION_FILE_PATH = './session.json';
+const CONTACTS = './contacts.json';
 
-// Criar uma nova instância do cliente
 const client = new Client({
   authStrategy: new LocalAuth()
 });
 
-// Evento de geração do código QR
 client.on('qr', (qr) => {
-  // Exibir o código QR no terminal
   qrcode.generate(qr, { small: true });
 });
 
-// Evento de autenticação bem-sucedida
 client.on('authenticated', (session) => {
   console.log('Autenticado com sucesso!');
-  // Salvar informações da sessão para reutilização futura
-  // fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), (err) => {
-  //   if (err) {
-  //     console.error('Erro ao salvar sessão:', err);
-  //   }
-  // });
 });
 
-// Evento de recebimento de mensagem
 client.on('message', (message) => {
   console.log('Nova mensagem recebida:', message.body);
 });
 
-// Função para enviar mensagem para um contato específico
-const sendMonthlyMessage = async (contactId, message) => {
+const sendMonthlyMessage = async ({ id, name }, message) => {
   try {
     // const chats = await client.getChats()
     // console.log(chats.filter(c => c.isGroup && c.name === 'Test group messages'))
-    const chat = await client.getChatById(contactId);
+    const chat = await client.getChatById(id);
     await chat.sendMessage(message);
-    console.log('Mensagem enviada com sucesso!');
+    console.log(`Mensagem enviada com sucesso para ${name}!`);
   } catch (error) {
-    console.error('Erro ao enviar mensagem:', error);
+    console.error(`Erro ao enviar mensagem para ${name}:`, error);
   }
 };
-
-// Definir a lista de contatos e mensagens
-const contacts = [
-
-];
 
 function buildMessage(date) {
     const message = `💰 Contribuição de ${date} 💰
@@ -64,25 +47,37 @@ function buildMessage(date) {
  PIX: 61999714473 (celular)
  Nome: João Felipe Duarte Pessanha
     
- Qualquer coisa estamos a disposição.`;
+ Qualquer dificuldade, estamos à disposição.`;
 
   return message
 }
 
+async function getContacts() {
+  try {
+    const data = await fs.readFile(CONTACTS, 'utf8');
+    const jsonData = JSON.parse(data);
+    return jsonData;
+  } catch (error) {
+    console.error('Error reading or parsing the file:', error);
+    throw error;
+  }
+}
 
-
-// Enviar mensagens para os contatos no início do mês
-const sendMonthlyMessages = () => {
+const sendMonthlyMessages = async () => {
   const now = moment();
   const startOfMonth = moment().startOf('month');
+
+  const contacts = await getContacts()
   //if (now.isSame(startOfMonth, 'day')) {
     contacts.forEach((contact) => {
-      sendMonthlyMessage(contact.id, buildMessage(moment().format('MMMM/YY')));
+      sendMonthlyMessage({ 
+        id: contact.id, name: contact.name
+      }, 
+        buildMessage(moment().format('MMMM/YY')));
     });
   //}
 };
 
-// Inicializar o cliente e enviar as mensagens no início do mês
 client.initialize().then(() => {
   sendMonthlyMessages();
 });
