@@ -40,7 +40,7 @@ function buildMessage(date) {
 
  Pessoal, estamos começando mais um mês e o melhor momento para pagar as contas 😅
     
- Assim, aproveitamos para lembrar da contribuição da equipe. Pedimos que o valor a ser contribuído seja transferido até o dia 06 (nossa próxima reunião) 
+ Assim, aproveitamos para lembrar da contribuição da equipe. Pedimos que o valor a ser contribuído seja transferido até nossa próxima reunião
     
  A contribuição, como regra, será um dia de salário do casal por ano, dividido em 10 meses (fevereiro a novembro). Ex: salário mensal do casal de 3.000,00 dividido por 30 dias = 100,00, que dividido em 10 reuniões = 10,00 por reunião.
     
